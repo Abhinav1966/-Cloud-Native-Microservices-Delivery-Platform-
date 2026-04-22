@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy EC2 - AWS Clone</title>
+    <link rel="stylesheet" href="{% static 'deployment.css' %}?v=2">
+</head>
+<body>
+
+<nav class="aws-navbar">
+    <div class="nav-left">
+        <span class="aws-logo">AWS CLOUD</span>
+        <a href="{% url 'home' %}" class="nav-item">Home</a>
+    </div>
+</nav>
+
+<div class="form-container">
+    <h2>🚀 Custom Infrastructure Request</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <label>Project/Server Name</label> 
+        {{ form.project_name }}
+        
+        <label>Instance Type</label> 
+        {{ form.instance_type }}
+        
+        <label>AMI ID</label> 
+        {{ form.ami_id }}
+        
+        <label>Environment</label> 
+        {{ form.environment }}
+
+        <h3>1. Provider & Instance</h3>
+        <label>AWS Region</label> 
+        {{ form.aws_region }}
+
+        <h3>2. Access & Keys</h3>
+        <label>Public Key Path (Read-Only)</label> 
+        {{ form.public_key_path }}
+        
+        <h3>3. Security Group</h3>
+        <label>Group Name</label> 
+        {{ form.sec_group_name }}
+        
+        <label>Description</label> 
+        {{ form.sec_group_desc }}
+        
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>From Port</label> 
+                {{ form.ingress_from_port }}
+            </div>
+            <div style="flex: 1;">
+                <label>To Port</label> 
+                {{ form.ingress_to_port }}
+            </div>
+        </div>
+        
+        <label>Protocol</label> 
+        {{ form.ingress_protocol }}
+        
+        <label>CIDR Block (IP)</label> 
+        {{ form.ingress_cidr }}
+
+        <h3>4. Initialization</h3>
+        <label>User Data Script (Bash)</label> 
+        
+        <textarea name="user_data_script" id="id_user_data_script">#!/bin/bash
+</textarea>
+
+        <button type="submit" class="form-btn">Generate Configuration</button>
+    </form>
+</div>
+
+</body>
+</html>

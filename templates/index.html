@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Dashboard</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+{% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' %}
+<nav class="aws-navbar">
+    <div class="nav-left">
+        <span class="aws-logo">AWS CLOUD</span>
+        <a href="{% url 'home' %}" class="nav-item active">Home</a>
+        <div class="dropdown">
+            <button class="dropbtn">Services ▾</button>
+            <div class="dropdown-content">
+                <a href="#">All Services</a>
+                <a href="#">Recently Visited</a>
+            </div>
+        </div>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="serviceSearch" placeholder="Search">
+        </div>
+    </div>
+    <div class="nav-right">
+        <div class="auth-group">
+            <a href="{% url 'login' %}" class="signin-link">
+                <span>Sign In</span>
+                <span class="user-icon">👤</span>
+            </a>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<header class="hero-slider">
+    <button class="hero-arrow left" onclick="moveHero(-1)">❮</button>
+    <button class="hero-arrow right" onclick="moveHero(1)">❯</button>
+
+    <div class="hero-track" id="heroTrack">
+        <div class="hero-slide active">
+            <div class="hero-content">
+                <p class="featured-label">FEATURED <span>AMAZON EC2:</span></p>
+                <h1>Elastic Compute Cloud</h1>
+                <div class="hero-btns">
+                    <a href="{% url 'create_server' %}" class="btn-white" style="text-decoration:none; color:black;">Deploy Now</a>
+                    <button class="btn-outline">Learn More</button>
+                </div>
+            </div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" class="aws-hero-logo">
+        </div>
+        <div class="hero-slide">
+            <div class="hero-content">
+                <p class="featured-label">FEATURED <span>AMAZON S3:</span></p>
+                <h1>Simple Storage Service</h1>
+                <div class="hero-btns">
+                    <button class="btn-white">Create Bucket</button>
+                    <button class="btn-outline">Learn More</button>
+                </div>
+            </div>
+            <img src="https://img.icons8.com/color/144/amazon-s3.png" class="aws-hero-logo">
+        </div>
+    </div>
+</header>
+
+<main class="dashboard-container">
+    
+    <section class="category-section">
+        <h2 class="section-title">Trending Services</h2>
+        <div class="honeycomb" id="trending-grid"></div>
+    </section>
+
+    <section class="category-section">
+        <h2 class="section-title">Compute Favorites</h2>
+        <div class="honeycomb" id="compute-grid"></div>
+    </section>
+
+    <section class="category-section">
+        <h2 class="section-title">Storage Solutions</h2>
+        <div class="honeycomb" id="storage-grid"></div>
+    </section>
+
+    <section class="category-section">
+        <h2 class="section-title">Database Options</h2>
+        <div class="honeycomb" id="database-grid"></div>
+    </section>
+
+</main>
+
+<script src="{% static 'main.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+/* static/style.css */
+
+:root {
+    --bg-main: #f0f2f5;       /* Light Gray Page Background */
+    --card-bg: #ffffff;       /* White Cards */
+    --text-main: #1b1b1b;     /* Dark Text */
+    --gov-blue: #003366;      /* Official Navy Blue */
+    --gov-accent: #005ea2;    /* Brighter Link Blue */
+    --text-secondary: #565c65;
+}
+
+/* --- Base Styles --- */
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* --- Navbar (FIXED) --- */
+.aws-navbar {
+    background-color: var(--gov-blue);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes Left and Right apart */
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Left side: Logo, Home, Dropdown, Search */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Spacing between items */
+    flex-grow: 1;
+}
+
+.aws-logo {
+    color: white;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
+    font-weight: 500;
+}
+.nav-item:hover, .nav-item.active { color: white; }
+
+/* Dropdown Fix */
+.dropdown { position: relative; }
+.dropbtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+.dropbtn:hover { color: white; }
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    z-index: 1001;
+    overflow: hidden;
+}
+.dropdown:hover .dropdown-content { display: block; }
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+}
+.dropdown-content a:hover { background-color: #f0f2f5; color: var(--gov-blue); }
+
+/* Search Bar Fix */
+.search-container {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    width: 250px;
+}
+.search-icon { font-size: 14px; margin-right: 8px; filter: grayscale(1); }
+.search-container input {
+    background: none;
+    border: none;
+    color: white;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+.search-container input::placeholder { color: rgba(255,255,255,0.7); }
+
+/* Right side: Sign In */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.signin-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    background-color: rgba(255,255,255,0.1); /* Subtle button background */
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.signin-link:hover { background-color: rgba(255,255,255,0.2); }
+.user-icon { font-size: 18px; }
+
+/* --- Hero Slider --- */
+.hero-slider {
+    position: relative;
+    margin: 30px 40px;
+    height: 300px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-top: 5px solid var(--gov-blue);
+}
+
+.hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 60px;
+    box-sizing: border-box;
+    background: white; /* Ensures no transparent overlap */
+}
+
+.hero-slide.active { opacity: 1; z-index: 10; }
+
+.hero-content h1 {
+    font-size: 32px;
+    color: var(--gov-blue);
+    margin: 15px 0;
+}
+
+.featured-label span {
+    color: var(--gov-accent);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.btn-white {
+    background: var(--gov-blue);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+}
+.btn-white:hover { background: #002244; color: white; }
+
+.btn-outline {
+    background: white;
+    border: 2px solid var(--gov-blue);
+    color: var(--gov-blue);
+    padding: 10px 22px;
+    border-radius: 4px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.aws-hero-logo {
+    max-height: 200px;
+    width: auto;
+    opacity: 0.1;
+    filter: grayscale(100%);
+}
+
+.hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 20px;
+}
+.hero-arrow.left { left: 0; }
+.hero-arrow.right { right: 0; }
+
+/* --- Dashboard Grids (Horizontal Scroll Fix) --- */
+.dashboard-container { padding: 0 40px 40px; }
+.category-section { margin-top: 40px; }
+
+.section-title {
+    font-size: 22px;
+    color: var(--text-main);
+    border-bottom: 2px solid #dde1e5;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Horizontal scrolling container */
+.honeycomb {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 10px 5px;
+    align-items: stretch;
+}
+
+.service-card {
+    background-color: var(--card-bg);
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    padding: 25px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative; /* Critical for badge positioning */
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: var(--gov-accent);
+}
+
+.service-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gov-blue);
+    margin-top: 15px;
+    text-align: center;
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #e6f6ff;
+    color: var(--gov-accent);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.service-card img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}

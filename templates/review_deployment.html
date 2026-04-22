@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review & Deploy</title>
+    <link rel="stylesheet" href="{% static 'deployment.css' %}?v=6">
+    <style>
+        /* --- TERMINAL STYLES (Fixed) --- */
+        .terminal-window {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            font-size: 13px;
+            margin-top: 10px;
+            cursor: text; /* Show text cursor when hovering box */
+            position: relative;
+        }
+
+        .terminal-output { 
+            white-space: pre-wrap; 
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .input-line { 
+            display: flex; 
+            align-items: center; 
+            margin-top: 10px; 
+        }
+
+        .prompt { 
+            color: #00ff00; 
+            margin-right: 10px; 
+            font-weight: bold; 
+            white-space: nowrap;
+        }
+
+        .cmd-input {
+            background: transparent;
+            border: none; /* No border normally */
+            color: #fff;
+            font-family: inherit;
+            font-size: inherit;
+            flex: 1;
+            outline: none;
+            caret-color: #00ff00; /* CRITICAL: Makes cursor Green */
+            opacity: 1; /* Ensure it is visible */
+            z-index: 100; /* Ensure it is on top */
+        }
+        
+        /* Debugging: If you still can't see it, this adds a faint outline when clicked */
+        .cmd-input:focus {
+            background-color: rgba(255, 255, 255, 0.05); 
+        }
+
+        .user-cmd { color: #fff; font-weight: bold; }
+        .system-msg { color: #aaa; font-style: italic; }
+        .error-msg { color: #ff5555; }
+    </style>
+</head>
+<body>
+
+<nav class="aws-navbar">
+    <div class="nav-left">
+        <span class="aws-logo">AWS CLOUD</span>
+        <a href="{% url 'home' %}" class="nav-item">Home</a>
+    </div>
+</nav>
+
+<div class="review-container">
+    <h1 class="success-header">✅ Configuration Ready</h1>
+    <p>The Terraform setup file (<code>main.tf</code>) has been generated successfully.</p>
+
+    <h3 style="margin-top:20px;">Generated Code Preview</h3>
+    <div class="code-box">
+<pre>{{ tf_code }}</pre>
+    </div>
+
+    <h3 style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+        🚀 Live Deployment Terminal
+    </h3>
+    <p style="font-size: 14px; color: #666;">
+        Type <code>terraform init</code> to start. (Click the black box to type).
+    </p>
+
+    <div class="terminal-window" id="terminalWindow" onclick="forceFocus()">
+        <div id="terminalOutput">
+            <div class="terminal-output">AWS Web Shell v1.2 [Connected]</div>
+            <div class="terminal-output">Current Directory: ~/deployments/</div>
+            <div class="terminal-output">File 'main.tf' detected. Ready for initialization.</div>
+            <br>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">admin@aws-web:~/deployments$</span>
+            <input type="text" id="cmdInput" class="cmd-input" autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <div style="margin-top: 25px; display: flex;">
+        <a href="{% url 'create_server' %}" class="btn-outline">
+            &larr; Edit Configuration
+        </a>
+        <a href="{% url 'home' %}" class="btn-outline">
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+    const inputField = document.getElementById('cmdInput');
+    const outputDiv = document.getElementById('terminalOutput');
+    const terminalWindow = document.getElementById('terminalWindow');
+
+    // 1. Force focus immediately when page loads
+    window.onload = function() {
+        inputField.focus();
+    };
+
+    // 2. Function to ensure focus always lands on input
+    function forceFocus() {
+        inputField.focus();
+    }
+
+    inputField.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const command = inputField.value;
+            if (!command) return;
+
+            // Display user command
+            appendToTerminal('admin@aws-web:~/deployments$ ' + command, 'user-cmd');
+            inputField.value = ''; 
+
+            // Show loading
+            const loadingId = 'loading-' + Date.now();
+            appendToTerminal('Processing...', 'system-msg', loadingId);
+
+            // API Call
+            fetch('/api/terminal/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(loadingId).remove();
+                appendToTerminal(data.output);
+            })
+            .catch(error => {
+                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                appendToTerminal('Error: Connection to server failed.', 'error-msg');
+            });
+        }
+    });
+
+    function appendToTerminal(text, className = '', id = '') {
+        const div = document.createElement('div');
+        div.className = 'terminal-output ' + className;
+        if(id) div.id = id;
+        div.textContent = text;
+        outputDiv.appendChild(div);
+        
+        // Auto scroll to bottom
+        terminalWindow.scrollTop = terminalWindow.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
