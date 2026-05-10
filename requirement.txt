@@ -1,0 +1,22 @@
+# Web Framework & Core
+Django>=4.2.0
+flask>=3.0.0
+gunicorn>=21.2.0
+python-dotenv>=1.0.0
+
+# AWS & Cloud infrastructure
+boto3>=1.28.0
+botocore>=1.31.0
+
+# Database & Storage
+psycopg2-binary>=2.9.9
+redis>=5.0.0
+
+# DevOps & Automation tools
+fabric>=3.2.0
+ansible>=9.0.0
+requests>=2.31.0
+
+# Development/Debugging
+pip-tools>=7.3.0
+black>=23.9.0

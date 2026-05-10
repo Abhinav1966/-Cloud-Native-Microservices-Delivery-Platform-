@@ -13,3 +13,10 @@ env/
 
 # OS specific
 .DS_Store
+aws_credentials
+.terraform/
+*.tfstate.backup
+*.zip
+__pycache__/
+db.sqlite3
+**/*.tfstate*

@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "web" {
-  key_name   = "test-key"
+  key_name   = "new-key"
   public_key = file("/home/abhinav_007/.ssh/web_key.pub")
 }
 
@@ -35,14 +35,14 @@ resource "aws_security_group" "ssh_access" {
   }
 }
 
-resource "aws_instance" "test" {
-  ami                    = "ami-0c55b159cbfafe1f0"
+resource "aws_instance" "new" {
+  ami                    = "ami-0a59ec92177ec3fad"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.web.key_name
   vpc_security_group_ids = [aws_security_group.ssh_access.id]
 
   tags = {
-    Name        = "test"
+    Name        = "new"
     Environment = "Dev"
     CreatedBy   = "DemoUser"
   }

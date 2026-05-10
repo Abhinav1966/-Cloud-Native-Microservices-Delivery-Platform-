@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import shlex
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.conf import settings
@@ -15,24 +16,18 @@ from .forms import InfrastructureForm
 # ==========================================
 # 1. WEBSITE PAGES (The "Front Desk")
 # ==========================================
-
-# This simply loads the main homepage (Dashboard) for the user.
 def loadDashboard(request):
     return render(request, 'index.html')
 
-# This provides a list of all resources (servers, databases) to the frontend.
 def resource_api(request):
     resources = list(Resource.objects.values('name', 'type', 'status', 'icon_name'))
-    
     for res in resources:
         res['icon_url'] = f"/static/icons/{res['icon_name']}" if res['icon_name'] else "https://img.icons8.com/color/96/amazon-web-services.png"
-    
     return JsonResponse(resources, safe=False)
 
 # ==========================================
 # 2. USER SECURITY (Login & Signup)
 # ==========================================
-
 def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -59,16 +54,13 @@ def login_view(request):
 # ==========================================
 # 3. THE INFRASTRUCTURE BUILDER (The Core Logic)
 # ==========================================
-
 def create_server(request):
     if request.method == 'POST':
         form = InfrastructureForm(request.POST)
-        
         if form.is_valid():
             req = form.save() 
             user_name = request.user.username if request.user.is_authenticated else "DemoUser"
 
-            # --- STEP 1: Generate the Terraform Code ---
             terraform_code = f"""
 terraform {{
   required_providers {{
@@ -84,7 +76,7 @@ provider "aws" {{
 
 resource "aws_key_pair" "web" {{
   key_name   = "{req.project_name}-key"
-  public_key = file("{req.public_key_path}")
+  public_key = file("/home/abhinav_007/.ssh/web_key.pub")
 }}
 
 resource "aws_security_group" "ssh_access" {{
@@ -123,32 +115,28 @@ resource "aws_instance" "{req.project_name}" {{
 EOF
 }}
 """
-            # --- STEP 2: Save the file ---
-            # We ensure the folder exists before trying to write to it
             deploy_dir = os.path.join(settings.BASE_DIR, 'deployments')
             os.makedirs(deploy_dir, exist_ok=True)
             
             with open(os.path.join(deploy_dir, 'main.tf'), 'w') as f:
                 f.write(terraform_code)
 
-            # --- STEP 3: Show the user what we built ---
             context = {
                 'tf_code': terraform_code,
                 'project_name': req.project_name
             }
             return render(request, 'review_deployment.html', context)
     else:
+        # We grab the dynamic key path from the form class dynamically
         form = InfrastructureForm(initial={
             'user_data_script': '#!/bin/bash\n',
-            'public_key_path': '/home/abhinav_007/.ssh/web_key.pub',
             'aws_region': 'us-east-1'
         })
     return render(request, 'create_server.html', {'form': form})
 
 # ==========================================
-# 4. THE WEB TERMINAL (The "Remote Control")
+# 4. THE SECURE WEB TERMINAL
 # ==========================================
-
 @csrf_exempt
 def terminal_api(request):
     if request.method == 'POST':
@@ -156,26 +144,20 @@ def terminal_api(request):
             data = json.loads(request.body)
             command = data.get('command', '').strip()
 
-            # -------------------------------------------------------------
-            # 1. SETUP ABSOLUTE PATHS (The Fix for "Connection Failed")
-            # -------------------------------------------------------------
             base_dir = settings.BASE_DIR
             deploy_dir = os.path.join(base_dir, 'deployments')
             plugin_dir = os.path.join(base_dir, 'terraform-plugins')
             creds_file = os.path.join(base_dir, 'aws_credentials')
 
-            # Ensure deployment folder exists, or subprocess will crash
             if not os.path.exists(deploy_dir):
                 os.makedirs(deploy_dir, exist_ok=True)
 
-            # -------------------------------------------------------------
-            # 2. SECURITY CHECK (Whitelist)
-            # -------------------------------------------------------------
             allowed_commands = [
                 'terraform init', 'terraform plan', 
                 'terraform apply', 'terraform apply -auto-approve', 
                 'terraform destroy', 'terraform destroy -auto-approve', 
-                'ls', 'pwd', 'whoami', 'terraform --version'
+                'ls', 'pwd', 'whoami', 'terraform --version',
+                'ls', 'pwd', 'whoami', 'terraform --version', 'ssh'
             ]
             
             is_allowed = False
@@ -187,49 +169,34 @@ def terminal_api(request):
             if not is_allowed and not command.startswith('echo'):
                 return JsonResponse({'output': f"Command '{command}' is not allowed for security reasons."})
 
-            # -------------------------------------------------------------
-            # 3. AUTO-CONFIGURE COMMANDS
-            # -------------------------------------------------------------
-            # If user types "terraform init", we secretly swap it
-            # to point to the absolute path of your local plugins.
-            if command == 'terraform init':
-                command = f'terraform init -plugin-dir="{plugin_dir}"'
+            
 
-            # Force auto-approve for smoother UI
             if command == 'terraform apply': command = 'terraform apply -auto-approve'
             if command == 'terraform destroy': command = 'terraform destroy -auto-approve'
 
-            # -------------------------------------------------------------
-            # 4. PREPARE ENVIRONMENT (Credentials)
-            # -------------------------------------------------------------
             env = os.environ.copy()
-            # Only add creds if the file actually exists
             if os.path.exists(creds_file):
                 env['AWS_SHARED_CREDENTIALS_FILE'] = creds_file
                 env['AWS_REGION'] = 'us-east-1'
 
-            # -------------------------------------------------------------
-            # 5. EXECUTE
-            # -------------------------------------------------------------
+            safe_command_list = shlex.split(command)
+
             process = subprocess.run(
-                command, 
-                shell=True, 
+                safe_command_list, 
+                shell=False, 
                 cwd=deploy_dir, 
                 capture_output=True, 
                 text=True,
                 env=env
             )
             
-            # Combine stdout and stderr so you see everything
             full_output = process.stdout + process.stderr
-            
             if not full_output:
                 full_output = "Command executed (No output returned)."
 
             return JsonResponse({'output': full_output})
 
         except Exception as e:
-            # Send the ACTUAL python error to your browser console
             return JsonResponse({'output': f"PYTHON SERVER ERROR: {str(e)}"})
             
     return JsonResponse({'output': 'Invalid request'})
